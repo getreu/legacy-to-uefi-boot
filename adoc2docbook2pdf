@@ -1,0 +1,36 @@
+#!/bin/sh
+# Author: Jens Getreu
+
+
+
+render () {
+
+
+AdocBase=$(basename "$1" ".adoc")
+cd "source" || echo "Error: no source directory found!" || exit 1 
+InDir="./"
+OutDir="../build/pdf"
+mkdir -p "$OutDir"
+PdfBase=$(basename "$2" ".pdf")
+XmlFile="$OutDir/$AdocBase.xml"
+PdfFile="$OutDir/$PdfBase.pdf"
+
+
+echo asciidoctor -b docbook -r asciidoctor-diagram -r asciidoctor-bibtex -a data-uri!  -D "$OutDir" "$1"
+asciidoctor -b docbook -r asciidoctor-diagram -r asciidoctor-bibtex -a data-uri!  -D "$OutDir" "$1"
+
+cp -r "$InDir/images/" "$OutDir"
+
+echo fopub -H  "$XmlFile" 
+#fopub -t ./docbook-xsl  "$XmlFile" && \
+fopub -H  "$XmlFile" && \
+	rm  "$XmlFile" && \
+    rm  -v -r "$OutDir/images/" ; \
+    rm  -v -r "$OutDir/.asciidoctor/" ; \
+    mv -v "$OutDir/$AdocBase.pdf" "$OutDir/$PdfBase.pdf" && \
+	mupdf "$PdfFile" & 
+
+}
+
+
+render "index.adoc" "legacy-to-uefi-boot.pdf" \

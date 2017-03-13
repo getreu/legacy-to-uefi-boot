@@ -1,0 +1,30 @@
+#!/bin/sh
+# Author: Jens Getreu
+
+
+
+render () {
+### not needed
+### get absolute path
+#FullPath=$1
+#FullPath=$(readlink -f "$FullPath")
+
+
+BaseName=$(basename "$1" ".adoc")
+InDirName="$(dirname "$1")"
+OutDirName="./build/html"
+mkdir -p "$DirName"
+
+#asciidoctor -r asciidoctor-bibtex -r asciidoctor-diagram -b xhtml5 -D "$DirName" "$@"
+asciidoctor -r asciidoctor-diagram -b xhtml5 -D "$OutDirName" "$1"
+
+$InDirName/post_process_html "$OutDirName/$BaseName.html"
+
+rm -r "$OutDirName/.asciidoctor"
+cd "$OutDirName"
+cp -r ../../source/images/ .
+
+}
+
+
+render "source/index.adoc"

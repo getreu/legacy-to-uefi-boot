@@ -1,0 +1,17 @@
+*.swp
+*.swo
+*.pdf
+*.html
+*.log
+*.tex
+*.toc
+*.aux
+*.out
+**.cache
+*.xml
+*.xsl
+*.fo
+!docbook-xsl/
+.asciidoctor/
+build/
+
