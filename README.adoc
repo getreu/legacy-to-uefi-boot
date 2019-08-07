@@ -140,7 +140,7 @@ A good graphical tool is the Gnome Partition Editor `gparted`:
 [subs="+quotes"]
   # _gparted /dev/sdb_
 
-. Shrink the `/root` partition to 200MB in order to free 43MB (see 
+. Shrink the `/boot` partition to 200MB in order to free 43MB (see 
   partition 1 below).
 
 . Create a new 43MB partition for efi using `gparted` with partition 
