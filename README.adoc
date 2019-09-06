@@ -30,7 +30,7 @@ The manual is hosted on https://github.com/getreu/legacy-to-uefi-boot[Github]. T
 
 == Boot a live system
 
-. Enable UEFI in bios.
+. Enable UEFI in BIOS.
 
 . Boot an https://www.debian.org/CD/live/[recent Debian live]
   system on USB or DVD.
@@ -497,12 +497,16 @@ Reboot the system.
 
 == Validate the debian bootloader in UEFI Bios
 
-The bios will not accept the bootloader by default, because
+IMPORTANT: Form Debian 10 Buster on the following is not required any more. 
+           Skip it! More information can be found in this article about
+           https://wiki.debian.org/SecureBoot[SecureBoot].
+
+The BIOS will not accept the bootloader by default, because
 `/EFI/debian/grubx64.efi` is not the default path and 
 because the file has no Microsoft signature. 
 
 This is why `grubx64.efi` has to be validated manually 
-in the UEFI bios setup. In my InsydeH20 Bios I selected:
+in the UEFI BIOS setup. In my InsydeH20 BIOS I selected:
 
 menu:Security[Select an UEFI file as trusted > Enter]
 
@@ -510,9 +514,9 @@ Then browse to
  
   /EFI/debian/grubx64.efi
 
-in order to insert the grub boot loader in the trusted bootloader bios database.
+in order to insert the grub boot loader in the trusted bootloader BIOS database.
 
-NOTE: On my Acer E3-111 the bios menu entry was disabled by default.
+NOTE: On my Acer E3-111 the BIOS menu entry was disabled by default.
       To enable it I had to define first a supervisor password. +
 menu:Security[Set Supervisor Password > Enter]
 
