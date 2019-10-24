@@ -25,12 +25,11 @@ cp -r "$InDir/images/" "$OutDir"
 echo fopub -H  "$XmlFile" 
 #fopub -t ./docbook-xsl  "$XmlFile" && \
 $FOPPATH -H  "$XmlFile" && \
-	rm  "$XmlFile" && \
+	#rm  "$XmlFile" && \
     rm  -v -r "$OutDir/images/" ; \
     rm  -v -r "$OutDir/.asciidoctor/" ; \
     mv -v "$OutDir/$AdocBase.pdf" "$OutDir/$PdfBase.pdf" && \
 	mupdf "$PdfFile" & 
-
 }
 
 

@@ -1,9 +1,9 @@
-
 = Switch Debian from legacy to UEFI boot mode
 //26.10.2014
 //30.1.2017
 //11.3.2017
-07.08.2019
+//07.08.2019
+23.10.2019
 Jens Getreu
 :icons: font
 :data-uri:
@@ -26,18 +26,43 @@ UEFI boot system. Typical use case:
 NOTE: This manual has been tested on Debian 7 Wheezy, Debian 8 Jessie, 
 Debian 9 Stretch and Debian 10 Buster. 
 
-The manual is hosted on https://github.com/getreu/legacy-to-uefi-boot[Github]. There you can file https://github.com/getreu/legacy-to-uefi-boot/issues[issues] and https://github.com/getreu/legacy-to-uefi-boot/pulls[pull requests].
+The manual is hosted on https://github.com/getreu/legacy-to-uefi-boot[Github].
+There you can file https://github.com/getreu/legacy-to-uefi-boot/issues[issues]
+and https://github.com/getreu/legacy-to-uefi-boot/pulls[pull requests].
 
 == Boot a live system
 
-. Enable UEFI in BIOS.
+Chose one...
 
-. Boot an https://www.debian.org/CD/live/[recent Debian live]
-  system on USB or DVD.
+=== The long way
+
+1. Enable UEFI in BIOS.
+
+2. Boot an https://www.debian.org/CD/live/[recent Debian live]
+   system on USB or DVD.
+
+=== The short way
+
+The more advanced user can get along with an Debian installation disk 
+only. The installer disk has an excellent "Rescue mode" that automates many of 
+the steps below.
+
+1. Do not boot a live-syste, but boot your legacy Debian system as usual.
+2. Prepare the hard-disk as described in section *Prepare the hard-disk* below. 
+3. Reboot and enable UEFI in BIOS.
+4. Insert a Debian installation disk.
+5. Reboot again into the Debian installer disk and 
+   select *Advanced options -> Rescue mode*
+6. Configure keyboard, hostname, domain and network.
+7. Unlock encrypted hard-disks.
+8. Chose device to use as root system, e.g. `/dev/koobue1-vg/root` (for hostname  `koobue1`, yours is different).
+9. Answer: *Mount separate /boot partition?* with `yes`.
+10. Choose *Execute a shell in `/dev/koobue1-vg/root`*.
+11. Jump directly to section *Update Debian's /etc/fstab* hereafter in this manual.
 
 
 
-== Prepare the harddisk
+== Prepare the hard-disk
 
 === Back up your data
 
@@ -77,13 +102,14 @@ Filesystem             Size  Used Avail Use% Mounted on
 
 As you can see in the following partition table of the Debian legacy 
 boot system my `/boot` partition is number 1 
-(`/dev/sdb1`).
+(`/dev/sdb1`). On never systems SSD-disks might be listed as 
+`/dev/nvme0n1p1` where `p1` designates the first partition.
 
 WARNING: Although 1 is the default value 
 for standard debian installations better check!
 
 NOTE: The live system has identified this partition as 
-`/dev/sdb`. The debian system on your harddisk could reference it 
+`/dev/sdb`. The debian system on your hard-disk could reference it 
 differently.
 
 
@@ -145,10 +171,10 @@ A good graphical tool is the Gnome Partition Editor `gparted`:
 . Shrink the `/boot` partition to 200MB in order to free 43MB (see 
   partition 1 below).
 
-. Create a new 43MB partition for efi using `gparted` with partition 
-  code `EF00` (EFI system) and flag it *bootable*. Format the partition 
-  with a _fat32_ footnote:[fat32=vfat in `/etc/fstab`] filesystem (see 
-  partition 2 below).
+. Create a new 43MB partition for efi using `gparted` with partition code `EF00`
+  (EFI system) footnote:[You can change the partition code later] and flag it
+  *bootable*. Format the partition with a _fat32_ footnote:[fat32=vfat in
+  `/etc/fstab`] filesystem (see partition 2 below).
 
 . UEFI needs additionally   
   footnote:[I have not verified if the additional 1MB partition is 
@@ -193,6 +219,10 @@ Number  Start (sector)    End (sector)  Size       Code  Name
 ....
 footnote:[I noticed on my system the code EF00 
 changed somehow to 0700. Why?]
+
+If you haven't changed the partition code to `EF00` you can do it within 
+`gdisk` with the command `t`, followed by the partition number `2` and the
+partition code `EF00`.
 
 
 == Mount the Debian filesystem
@@ -380,6 +410,7 @@ Either this way...
 
 [subs="+quotes"]
   _# mount /dev/sdb1 /mnt/boot
+  # mkdir /mnt/boot/efi
   # mount /dev/sdb2 /mnt/boot/efi
   # for i in /dev/ /dev/pts /proc /sys ; do mount -B $i /mnt/$i ; done_
 
@@ -387,6 +418,7 @@ or this way, both commands do the same...
 
 [subs="+quotes"]
   _# mount /dev/sdb1 /mnt/boot
+  # mkdir /mnt/boot/efi
   # mount /dev/sdb2 /mnt/boot/efi
   # mount --bind /sys /mnt/sys
   # mount --bind /proc /mnt/proc
@@ -402,20 +434,45 @@ For internet access inside chroot:
   _# cp /etc/resolv.conf /mnt/etc/resolv.conf_  
 
 
-== Update debians /etc/fstab
 
-Update the entries in `/mnt/etc/fstab` to reflect the partition changes
-above. Compare the UUID's there with the ones listed here:
+
+== Inside the `chroot` environment 
+
+=== Execute a shell in a `chroot` environment
+
+Enter with:
+
+[subs="+quotes"]
+  # _chroot /mnt_
+  
+
+
+=== Update Debian's /etc/fstab
+
+Update the entries in `/etc/fstab` to reflect the partition changes
+above. We need to add the new *43.0 MiB EF00  Efi partition*:
+
  
 [subs="+quotes"]
-   # _ls /dev/disk/by-uuid_
+....
+# _ls /dev/disk/by-uuid_
 
-Add the new UEFI partition (see last line in `/etc/fstab` below) in 
-order to get it mounted permanently on `/boot/efi`.
+040cdd12-8e45-48bd-822e-7b73ef9fa09f
+*19F0-4372*
+....
+
+The UUID we are looking for is the only short 8-hex-digit ID, here: `19F0-4372`.
+
+We add one line in `/etc/fstab` to mount the new partition persistently:
+
+[subs="+quotes"]
+   # _echo "UUID=*19F0-4372* /boot/efi vfat defaults 0 2" >> /etc/fstab_
+
+Check last line in `/etc/fstab`. 
 
 [subs="+quotes"]
 ....
-# _cat /mnt/etc/fstab_
+# _cat /etc/fstab_
 # <file system> <mount point>   <type>  <options>       <dump>  <pass>
 /dev/mapper/koobue1-root /      ext4    errors=remount-ro 0       1
 # /boot was on /dev/sdb1 during installation
@@ -431,19 +488,8 @@ tmpfs           /var/run        tmpfs   defaults,nodev,nosuid,noexec,mode=0775,s
 
 TIP: I use `/dev/mapper` for the encrypted file system and `tmpfs` 
 because I have an SSD disk. 
-
-
-== Inside the `chroot` environment 
-
-=== Preparation
-
-Enter with:
-
-[subs="+quotes"]
-  # _chroot /mnt_
   
-
-Check
+=== Mount remaining disks
 
 [subs="+quotes"]
   # _cat /etc/fstab_
@@ -457,7 +503,6 @@ for not yet mounted entries and mount them manually e.g.
   ...
   
 
-  
 === Install grub-efi
 
 [subs="+quotes"]
@@ -495,7 +540,7 @@ Exit chroot environment.
 Reboot the system.
 
 
-== Validate the debian bootloader in UEFI Bios
+== Validate the Debian bootloader in UEFI Bios
 
 IMPORTANT: Form Debian 10 Buster on the following is not required any more. 
            Skip it! More information can be found in this article about
