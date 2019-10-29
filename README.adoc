@@ -43,11 +43,11 @@ Chose one...
 
 === The short way
 
-The more advanced user can get along with an Debian installation disk 
+The more advanced user can get along with a Debian installation disk 
 only. The installer disk has an excellent "Rescue mode" that automates many of 
 the steps below.
 
-1. Do not boot a live-syste, but boot your legacy Debian system as usual.
+1. Do not boot a live-system, but boot your legacy Debian system as usual.
 2. Prepare the hard-disk as described in section *Prepare the hard-disk* below. 
 3. Reboot and enable UEFI in BIOS.
 4. Insert a Debian installation disk.
@@ -72,7 +72,7 @@ Back up your data!
 
 === Identify Debian's "`/boot`" partition
 
-My lecagy boot system had a 243MiB 
+My lecagy boot system had a 243 MiB 
 ext2 partition mounted on /boot. This partition is never encrypted. 
 It is where the grub files and Linux 
 kernels reside. Check by double clicking on the 
@@ -168,20 +168,20 @@ A good graphical tool is the Gnome Partition Editor `gparted`:
 [subs="+quotes"]
   # _gparted /dev/sdb_
 
-. Shrink the `/boot` partition to 200MB in order to free 43MB (see 
+. Shrink the `/boot` partition to 200 MB in order to free 43 MB (see 
   partition 1 below).
 
-. Create a new 43MB partition for efi using `gparted` with partition code `EF00`
+. Create a new 43 MB partition for efi using `gparted` with partition code `EF00`
   (EFI system) footnote:[You can change the partition code later] and flag it
   *bootable*. Format the partition with a _fat32_ footnote:[fat32=vfat in
   `/etc/fstab`] filesystem (see partition 2 below).
 
 . UEFI needs additionally   
-  footnote:[I have not verified if the additional 1MB partition is 
+  footnote:[I have not verified if the additional 1 MB partition is 
   really necessary. Omitting this step the following error message may 
-  occur: `GPT detected. Please create a BIOS-Boot partition (>1MB, 
+  occur: `GPT detected. Please create a BIOS-Boot partition (>1 MB, 
   unformatted filesystem, bios_grub flag). This can be performed via 
-  tools such as Gparted. Then try again.`]  a _not_ formatted 1MB 
+  tools such as Gparted. Then try again.`]  a _not_ formatted 1 MB 
   partition . footnote:[Some say it should have the flag *bios_grub*, 
   for me it works without.] (see partition 3 below).
 
@@ -250,7 +250,7 @@ unmount an encrypted `root`-filesystem.
 
 
 NOTE: The recovery mode of the Debian 9 Stretch installer disk
-automates all following steps. Try this first. If it does not work 
+automates all following steps. Try this first. If it does not work, 
 follow the rest of this section.
 
 ==== Find the device and partition of the to be mounted logical volume
@@ -329,7 +329,7 @@ root@host-system:~# _lvscan_
 ....
 
 Logical volume of `disk-system`is registered now. It contains one `root` 
-partition (line 1) and and one `swap` partition (line 2).
+partition (line 1) and one `swap` partition (line 2).
 
 --
 
