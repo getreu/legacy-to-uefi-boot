@@ -14,18 +14,15 @@ mkdir -p "$OutDir"
 PdfBase=$(basename "$2" ".pdf")
 XmlFile="$OutDir/$AdocBase.xml"
 PdfFile="$OutDir/$PdfBase.pdf"
-FOPPATH="/usr/local/java-deployment/asciidoctor-fopub/fopub"
 
-
-echo asciidoctor -b docbook  -a data-uri!  -D "$OutDir" "$1"
+set -x
 asciidoctor -b docbook -a data-uri!  -D "$OutDir" "$1"
 
 cp -r "$InDir/images/" "$OutDir"
 
-echo fopub -H  "$XmlFile" 
 #fopub -t ./docbook-xsl  "$XmlFile" && \
-$FOPPATH -H  "$XmlFile" && \
-	#rm  "$XmlFile" && \
+fopub -H  "$XmlFile" && \
+	rm  "$XmlFile" && \
     rm  -v -r "$OutDir/images/" ; \
     rm  -v -r "$OutDir/.asciidoctor/" ; \
     mv -v "$OutDir/$AdocBase.pdf" "$OutDir/$PdfBase.pdf" && \
