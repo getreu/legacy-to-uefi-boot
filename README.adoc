@@ -3,7 +3,8 @@
 //30.1.2017
 //11.3.2017
 //07.08.2019
-23.10.2019
+//23.10.2019
+30.5.2020
 Jens Getreu
 :icons: font
 :data-uri:
@@ -30,44 +31,28 @@ The manual is hosted on https://github.com/getreu/legacy-to-uefi-boot[Github].
 There you can file https://github.com/getreu/legacy-to-uefi-boot/issues[issues]
 and https://github.com/getreu/legacy-to-uefi-boot/pulls[pull requests].
 
-== Boot a live system
 
-Chose one...
+.Before you start
 
-=== The long way
+1. Download and burn https://www.debian.org/CD/live/[A recent Debian live CD or DVD]
+
+2. Download and burn https://www.debian.org/distrib/netinst[A Debian installation disk with rescue mode]
+
+3. Back up your data!
+
+
+
+
+
+
+== Modify the hard-disk partitions
+
+=== Boot a Debian live system
 
 1. Enable UEFI in BIOS.
 
 2. Boot an https://www.debian.org/CD/live/[recent Debian live]
    system on USB or DVD.
-
-=== The short way
-
-The more advanced user can get along with a Debian installation disk 
-only. The installer disk has an excellent "Rescue mode" that automates many of 
-the steps below.
-
-1. Do not boot a live-system, but boot your legacy Debian system as usual.
-2. Prepare the hard-disk as described in section *Prepare the hard-disk* below. 
-3. Reboot and enable UEFI in BIOS.
-4. Insert a Debian installation disk.
-5. Reboot again into the Debian installer disk and 
-   select *Advanced options -> Rescue mode*
-6. Configure keyboard, hostname, domain and network.
-7. Unlock encrypted hard-disks.
-8. Chose device to use as root system, e.g. `/dev/koobue1-vg/root` (for hostname  `koobue1`, yours is different).
-9. Answer: *Mount separate /boot partition?* with `yes`.
-10. Choose *Execute a shell in `/dev/koobue1-vg/root`*.
-11. Jump directly to section *Update Debian's /etc/fstab* hereafter in this manual.
-
-
-
-== Prepare the hard-disk
-
-=== Back up your data
-
-Back up your data!
-
 
 
 === Identify Debian's "`/boot`" partition
@@ -227,10 +212,28 @@ partition code `EF00`.
 
 == Mount the Debian filesystem
 
+NOTE: The recovery mode of the Debian >= 9 Stretch installer disk
+automates all following steps in this section. Try this first. 
+
+1. Reboot and enable UEFI in BIOS.
+2. Insert a Debian installation disk.
+3. Reboot again into the Debian installer disk and 
+   select *Advanced options -> Rescue mode*
+4. Configure keyboard, hostname, domain and network.
+5. Unlock encrypted hard-disks.
+6. Chose device to use as root system, e.g. `/dev/koobue1-vg/root` (for 
+   hostname  `koobue1`, yours is different).
+7. Answer: *Mount separate /boot partition?* with `yes`.
+8. Choose *Execute a shell in `/dev/koobue1-vg/root`*.
+9. Jump directly to section *Update Debian's /etc/fstab* hereafter in this manual.
+
+If the above does not work work for you, 
+follow the rest of this section.
+
 The next step differs whether the `root`-filesystem is encrypted or not.
 
 
-=== Mount a non-encrypted `root`-filesystem
+=== Mount a non-encrypted "`root`"-filesystem
 
 . Mount the `/` (root) filesystem. 
 +
@@ -240,7 +243,7 @@ The next step differs whether the `root`-filesystem is encrypted or not.
   _# mount -t ext4 /dev/sdb5 /mnt_
 
 
-=== Mount an encrypted `root`-filesystem
+=== Mount an encrypted "`root`"-filesystem
 
 * For encrypted root filesystems the mounting procedure can be a little 
 tricky especially when the root filesystem resides inside a logical 
@@ -248,10 +251,6 @@ volume which is encrypted. This section shows how to mount and
 unmount an encrypted `root`-filesystem.  
 
 
-
-NOTE: The recovery mode of the Debian 9 Stretch installer disk
-automates all following steps. Try this first. If it does not work, 
-follow the rest of this section.
 
 ==== Find the device and partition of the to be mounted logical volume
 
@@ -436,9 +435,9 @@ For internet access inside chroot:
 
 
 
-== Inside the `chroot` environment 
+== Inside the "`chroot`" environment 
 
-=== Execute a shell in a `chroot` environment
+=== Execute a shell in a "`chroot`" environment
 
 Enter with:
 
@@ -447,7 +446,7 @@ Enter with:
   
 
 
-=== Update Debian's /etc/fstab
+=== Update Debian's "`/etc/fstab`"
 
 Update the entries in `/etc/fstab` to reflect the partition changes
 above. We need to add the new *43.0 MiB EF00  Efi partition*:
@@ -542,7 +541,8 @@ Reboot the system.
 
 == Validate the Debian bootloader in UEFI Bios
 
-IMPORTANT: Form Debian 10 Buster on the following is not required any more. 
+IMPORTANT: From Debian 10 Buster on, the following should not be 
+	   required any more. 
            Skip it! More information can be found in this article about
            https://wiki.debian.org/SecureBoot[SecureBoot].
 
