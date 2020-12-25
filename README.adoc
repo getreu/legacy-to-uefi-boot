@@ -4,7 +4,8 @@
 //11.3.2017
 //07.08.2019
 //23.10.2019
-30.5.2020
+//30.5.2020
+25.12.2020
 Jens Getreu
 :icons: font
 :data-uri:
@@ -16,16 +17,16 @@ Jens Getreu
 
 // excerpt-begin
 
-This note explains how to switch a legacy boot Debian/Ubuntu system into a 
-UEFI boot system. Typical use case: 
+This note explains how to switch a legacy boot Debian/Ubuntu system into a
+UEFI boot system. Typical use case:
 
 - switch a legacy boot installation into an UEFI one,
 - reinstall a broken UEFI boot loader on Debian 7, Debian 8, Debian 9 or Debian 10.
 
 // excerpt-end
 
-NOTE: This manual has been tested on Debian 7 Wheezy, Debian 8 Jessie, 
-Debian 9 Stretch and Debian 10 Buster. 
+NOTE: This manual has been tested on Debian 7 Wheezy, Debian 8 Jessie,
+Debian 9 Stretch and Debian 10 Buster.
 
 Please help to keep this manual up to date. It is hosted on
 https://github.com/getreu/legacy-to-uefi-boot[Github].  There you can file
@@ -58,14 +59,14 @@ https://github.com/getreu/legacy-to-uefi-boot/pulls[pull requests].
 
 === Identify Debian's "`/boot`" partition
 
-My lecagy boot system had a 243 MiB 
-ext2 partition mounted on /boot. This partition is never encrypted. 
-It is where the grub files and Linux 
-kernels reside. Check by double clicking on the 
-partition icon on the live-disk-desktop and have a look inside. 
+My legacy boot system had a 243 MiB
+ext2 partition mounted on /boot. This partition is never encrypted.
+It is where the grub files and Linux
+kernels reside. Check by double clicking on the
+partition icon on the live-disk-desktop and have a look inside.
 
 
-  
+
 [subs="+quotes"]
 ....
 # _ls -l_
@@ -86,16 +87,16 @@ Filesystem             Size  Used Avail Use% Mounted on
 /dev/sdb1              234M   28M  206M  13% /media/....
 ....
 
-As you can see in the following partition table of the Debian legacy 
-boot system my `/boot` partition is number 1 
-(`/dev/sdb1`). On never systems SSD-disks might be listed as 
+As you can see in the following partition table of the Debian legacy
+boot system my `/boot` partition is number 1
+(`/dev/sdb1`). On never systems SSD-disks might be listed as
 `/dev/nvme0n1p1` where `p1` designates the first partition.
 
-WARNING: Although 1 is the default value 
+WARNING: Although 1 is the default value
 for standard debian installations better check!
 
-NOTE: The live system has identified this partition as 
-`/dev/sdb`. The debian system on your hard-disk could reference it 
+NOTE: The live system has identified this partition as
+`/dev/sdb`. The debian system on your hard-disk could reference it
 differently.
 
 
@@ -104,11 +105,10 @@ differently.
 [subs="+quotes"]
 ----
 # _fdisk -l /dev/sdb_
-...
-   Device Boot      Start         End      Blocks   Id  System
-/dev/sdb1   ***        2048      499711       44032    7  HPFS/NTFS/exFAT
-...
-/dev/sdb5          501760   976771071   488134656   83  Linux
+
+Device      Boot   Start    End         Blocks    Id  System
+/dev/sdb1   ***      2048     499711      44032     7   HPFS/NTFS/exFAT
+/dev/sdb5          501760   976771071   488134656 83  Linux
 ----
 
 In legacy boot mode the `/boot` partition must have the `boot`-flag (*) set.
@@ -134,12 +134,12 @@ Number  Start (sector)    End (sector)  Size       Code  Name
 
 === Create GPT partition table
 
-Transform the partition table from MBR to GPT with 
+Transform the partition table from MBR to GPT with
 
 [subs="+quotes"]
 ....
   #_gdisk /dev/sdb_
-  
+
   _r_       recovery and transformation options (experts only)
   _f_       load MBR and build fresh GPT from it
 ....
@@ -154,7 +154,7 @@ A good graphical tool is the Gnome Partition Editor `gparted`:
 [subs="+quotes"]
   # _gparted /dev/sdb_
 
-. Shrink the `/boot` partition to 200 MB in order to free 43 MB (see 
+. Shrink the `/boot` partition to 200 MB in order to free 43 MB (see
   partition 1 below).
 
 . Create a new 43 MB partition for efi using `gparted` with partition code `EF00`
@@ -162,19 +162,22 @@ A good graphical tool is the Gnome Partition Editor `gparted`:
   *bootable*. Format the partition with a _fat32_ footnote:[fat32=vfat in
   `/etc/fstab`] filesystem (see partition 2 below).
 
-. UEFI needs additionally   
-  footnote:[I have not verified if the additional 1 MB partition is 
-  really necessary. Omitting this step the following error message may 
-  occur: `GPT detected. Please create a BIOS-Boot partition (>1 MB, 
-  unformatted filesystem, bios_grub flag). This can be performed via 
-  tools such as Gparted. Then try again.`]  a _not_ formatted 1 MB 
-  partition . footnote:[Some say it should have the flag *bios_grub*, 
-  for me it works without.] (see partition 3 below).
+. Grub2 needs additionally a _not_ formatted 1 MB partition to store its
+  stage two files
+  footnote:[ If you do not have an EF02 partition, Grub2 tries to find
+  unallocated space between your partitions for its stage tow code. Since the
+  space is unallocated in the GPT table, you may have a problem later on when
+  you decide to adjust any partition boundaries. Omitting this step the
+  following error message may occur: `GPT detected. Please create a BIOS-Boot
+  partition (>1 MB, unformatted filesystem, bios_grub flag). This can be
+  performed via tools such as Gparted. Then try again.` ]. The partition is
+  referred to as _core.img_
+  footnote:[ https://en.wikipedia.org/wiki/GNU_GRUB#Version_2_(GRUB_2)[Wikipedia article about Grub2] ].
+  1 MB is more than enough. Tag the partition as type `EF02` footnote:[
+  https://wiki.archlinux.org/index.php/GRUB#GUID_Partition_Table_.28GPT.29_specific_instructions[See:
+  GUID Partition Table (GPT) specific instructions] ].
 
-
-
-
-Leave the other partitions untouched (see partition 5 
+Leave the other partitions untouched (see partition 5
 below).
 
 
@@ -197,38 +200,38 @@ Disk /dev/sdb: 976773168 sectors, 465.8 GiB
 
 ...
 
-Number  Start (sector)    End (sector)  Size       Code  Name
-   1            2048          411647   200.0 MiB   8300  Linux filesystem
-   2          411648          499711  *43.0 MiB    EF00  Efi partition*
-   3          499712          501759  *1024.0 KiB  8300  Linux filesystem*
-   5          501760       976771071   465.5 GiB   8300  Linux filesystem
+Number Start (sector) End (sector)  Size       Code  Name
+   1           2048       411647   200.0 MiB   8300  Linux filesystem
+   2         411648       499711  *43.0 MiB     EF00  Efi partition*
+   3         499712       501759  *1024.0 KiB   EF02  BIOS boot partition*
+   5         501760    976771071   465.5 GiB   8300  Linux filesystem
 ....
-footnote:[I noticed on my system the code EF00 
-changed somehow to 0700. Why?]
 
-If you haven't changed the partition code to `EF00` you can do it within 
-`gdisk` with the command `t`, followed by the partition number `2` and the
-partition code `EF00`.
+If you haven't changed the partition code to `EF00` (or `EF02`) you can do
+it now within `gdisk` with the command `t`, followed by the partition number
+`2` and the partition code `EF00` (or `EF02`).
+
+
 
 
 == Mount the Debian filesystem
 
 NOTE: The recovery mode of the Debian >= 9 Stretch installer disk
-automates all following steps in this section. Try this first. 
+automates all following steps in this section. Try this first.
 
 1. Reboot and enable UEFI in BIOS.
 2. Insert a Debian installation disk.
-3. Reboot again into the Debian installer disk and 
+3. Reboot again into the Debian installer disk and
    select *Advanced options -> Rescue mode*
 4. Configure keyboard, hostname, domain and network.
 5. Unlock encrypted hard-disks.
-6. Chose device to use as root system, e.g. `/dev/koobue1-vg/root` (for 
+6. Chose device to use as root system, e.g. `/dev/koobue1-vg/root` (for
    hostname  `koobue1`, yours is different).
 7. Answer: *Mount separate /boot partition?* with `yes`.
 8. Choose *Execute a shell in `/dev/koobue1-vg/root`*.
 9. Jump directly to section *Update Debian's /etc/fstab* hereafter in this manual.
 
-If the above does not work work for you, 
+If the above does not work work for you,
 follow the rest of this section.
 
 The next step differs whether the `root`-filesystem is encrypted or not.
@@ -236,7 +239,7 @@ The next step differs whether the `root`-filesystem is encrypted or not.
 
 === Mount a non-encrypted "`root`"-filesystem
 
-. Mount the `/` (root) filesystem. 
+. Mount the `/` (root) filesystem.
 +
 * For non-encrypted root filesystems a simple `mount` will do.
 +
@@ -246,10 +249,10 @@ The next step differs whether the `root`-filesystem is encrypted or not.
 
 === Mount an encrypted "`root`"-filesystem
 
-* For encrypted root filesystems the mounting procedure can be a little 
-tricky especially when the root filesystem resides inside a logical 
-volume which is encrypted. This section shows how to mount and 
-unmount an encrypted `root`-filesystem.  
+* For encrypted root file systems the mounting procedure can be a little
+tricky especially when the root filesystem resides inside a logical
+volume which is encrypted. This section shows how to mount and
+unmount an encrypted `root`-filesystem.
 
 
 
@@ -277,15 +280,15 @@ The to be mounted device is `/dev/sdb`.
 root@host-system:~# _gdisk -l /dev/sdb_
 GPT fdisk (gdisk) version 0.8.5
 ...
-Number  Start (sector)    End (sector)  Size       Code  Name
-   1            2048          411647   200.0 MiB   8300  Linux filesystem
-   2          411648          494821   43.0 MiB    0700  
-   3          494822          501759   1024.0 KiB  8300  Linux filesystem
-   *5*          501760       976771071   465.5 GiB   8300  Linux filesystem
+Number Start (sector) End (sector)  Size       Code  Name
+   1           2048       411647   200.0 MiB   8300  Linux filesystem
+   2         411648       494821   43.0 MiB    0700
+   3         494822       501759   1024.0 KiB  8300  Linux filesystem
+   *5*         501760    976771071   465.5 GiB   8300  Linux filesystem
 ....
 +
-*The to be mounted logical volume of `disk-system` resides on `/dev/sdb5`.* 
-//The filssystems of `host-system` are on `/dev/sdb`.
+*The to be mounted logical volume of `disk-system` resides on `/dev/sdb5`.*
+//The file systems of `host-system` are on `/dev/sdb`.
 
 ////
 . Make sure that `/dev/sdb5` is not mounted yet.
@@ -298,7 +301,7 @@ Number  Start (sector)    End (sector)  Size       Code  Name
 
 
 
-==== Mount encrypted logical volume 
+==== Mount encrypted logical volume
 
 . Open decryption layer.
 +
@@ -314,7 +317,7 @@ Logical volume is not registered yet. Do so.
 [subs="+quotes"]
 ....
 root@host-system:~# _cryptsetup luksOpen */dev/sdb5* **sdb5**_crypt_
-Enter passphrase for /dev/sdb5: 
+Enter passphrase for /dev/sdb5:
 ....
 
 Enter disk password.
@@ -328,7 +331,7 @@ root@host-system:~# _lvscan_
   ACTIVE            '/dev/host-system/swap_1' [7.20 GiB] inherit
 ....
 
-Logical volume of `disk-system`is registered now. It contains one `root` 
+Logical volume of `disk-system`is registered now. It contains one `root`
 partition (line 1) and one `swap` partition (line 2).
 
 --
@@ -365,9 +368,9 @@ Check success.
 [subs="+quotes"]
 ....
 root@host-system:~# _ls /mnt_
-bin   etc         initrd.img.old  lib64       mnt   proc  sbin     sys  var
-boot  home        lib             lost+found  mnt2  root  selinux  tmp  vmlinuz
-dev   initrd.img  lib32           media       opt   run   srv      usr  vmlinuz.old
+bin  etc    initrd.img.old lib64      mnt  proc sbin    sys var
+boot home        lib       lost+found mnt2 root selinux tmp vmlinuz
+dev  initrd.img  lib32     media      opt  run  srv     usr vmlinuz.old
 ....
 --
 
@@ -426,17 +429,17 @@ or this way, both commands do the same...
   # mount --bind /dev/pts /mnt/dev/pts_
 
 
-.Internet access 
+.Internet access
 
 For internet access inside chroot:
 
 [subs="+quotes"]
-  _# cp /etc/resolv.conf /mnt/etc/resolv.conf_  
+  _# cp /etc/resolv.conf /mnt/etc/resolv.conf_
 
 
 
 
-== Inside the "`chroot`" environment 
+== Inside the "`chroot`" environment
 
 === Execute a shell in a "`chroot`" environment
 
@@ -444,7 +447,7 @@ Enter with:
 
 [subs="+quotes"]
   # _chroot /mnt_
-  
+
 
 
 === Update Debian's "`/etc/fstab`"
@@ -452,7 +455,7 @@ Enter with:
 Update the entries in `/etc/fstab` to reflect the partition changes
 above. We need to add the new *43.0 MiB EF00  Efi partition*:
 
- 
+
 [subs="+quotes"]
 ....
 # _ls /dev/disk/by-uuid_
@@ -468,32 +471,32 @@ We add one line in `/etc/fstab` to mount the new partition persistently:
 [subs="+quotes"]
    # _echo "UUID=*19F0-4372* /boot/efi vfat defaults 0 2" >> /etc/fstab_
 
-Check last line in `/etc/fstab`. 
+Check last line in `/etc/fstab`.
 
 [subs="+quotes"]
 ....
 # _cat /etc/fstab_
-# <file system> <mount point>   <type>  <options>       <dump>  <pass>
-/dev/mapper/koobue1-root /      ext4    errors=remount-ro 0       1
+# <file system> <mount point>  <type> <options>       <dump>  <pass>
+/dev/mapper/koobue1-root /     ext4   errors=remount-ro 0       1
 # /boot was on /dev/sdb1 during installation
 *UUID=040cdd12-8e45-48bd-822e-7b73ef9fa09f  /boot   ext2*  defaults 0  2
-/dev/mapper/koobue1-swap_1 none swap    sw              0       0
-/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
+/dev/mapper/koobue1-swap_1 none swap   sw              0       0
+/dev/sr0        /media/cdrom0  udf,iso9660 user,noauto 0       0
 #Jens: tmpfs added for SSD
-tmpfs           /tmp            tmpfs   defaults,nodev,nosuid,size=500m 0 0 
-tmpfs           /var/lock       tmpfs   defaults,nodev,nosuid,noexec,mode=1777,size=100m 0 0 
-tmpfs           /var/run        tmpfs   defaults,nodev,nosuid,noexec,mode=0775,size=100m 0 0 
-*UUID=19F0-4372  /boot/efi       vfat*    defaults        0       2
+tmpfs           /tmp           tmpfs  defaults,nodev,nosuid,size=500m 0 0
+tmpfs           /var/lock      tmpfs  defaults,nodev,nosuid,noexec,mode=1777,size=100m 0 0
+tmpfs           /var/run       tmpfs  defaults,nodev,nosuid,noexec,mode=0775,size=100m 0 0
+*UUID=19F0-4372  /boot/efi     vfat*  defaults         0       2
 ....
 
-TIP: I use `/dev/mapper` for the encrypted file system and `tmpfs` 
-because I have an SSD disk. 
-  
+TIP: I use `/dev/mapper` for the encrypted file system and `tmpfs`
+because I have an SSD disk.
+
 === Mount remaining disks
 
 [subs="+quotes"]
   # _cat /etc/fstab_
-  
+
 for not yet mounted entries and mount them manually e.g.
 
 [subs="+quotes"]
@@ -501,7 +504,7 @@ for not yet mounted entries and mount them manually e.g.
   # mount /run
   # mount /var/lock_
   ...
-  
+
 
 === Install grub-efi
 
@@ -522,7 +525,7 @@ A Debian entry should be listed here:
 
 [subs="+quotes"]
 ....
-# _efibootmgr_ 
+# _efibootmgr_
 BootCurrent: 0000
 Timeout: 0 seconds
 BootOrder: 0000,2001,2002,2003
@@ -531,9 +534,9 @@ Boot2001* EFI USB Device
 Boot2002* EFI DVD/CDROM
 Boot2003* EFI Network
 ....
- 
+
 Exit chroot environment.
-  
+
 [subs="+quotes"]
   _exit_
 
@@ -542,22 +545,22 @@ Reboot the system.
 
 == Validate the Debian bootloader in UEFI Bios
 
-IMPORTANT: From Debian 10 Buster on, the following should not be 
-	   required any more. 
+IMPORTANT: From Debian 10 Buster on, the following should not be
+	   required any more.
            Skip it! More information can be found in this article about
            https://wiki.debian.org/SecureBoot[SecureBoot].
 
 The BIOS will not accept the bootloader by default, because
-`/EFI/debian/grubx64.efi` is not the default path and 
-because the file has no Microsoft signature. 
+`/EFI/debian/grubx64.efi` is not the default path and
+because the file has no Microsoft signature.
 
-This is why `grubx64.efi` has to be validated manually 
+This is why `grubx64.efi` has to be validated manually
 in the UEFI BIOS setup. In my InsydeH20 BIOS I selected:
 
 menu:Security[Select an UEFI file as trusted > Enter]
 
 Then browse to
- 
+
   /EFI/debian/grubx64.efi
 
 in order to insert the grub boot loader in the trusted bootloader BIOS database.
@@ -569,10 +572,10 @@ menu:Security[Set Supervisor Password > Enter]
 
 == References
 
-Tanguy:: Tanguy: _Debian: switch to UEFI boot._ 
-http://tanguy.ortolo.eu/blog/article51/debian-efi. April 2012. 
+Tanguy:: Tanguy: _Debian: switch to UEFI boot._
+http://tanguy.ortolo.eu/blog/article51/debian-efi. April 2012.
 
-Vulcan:: Vulcan, Silviu: _Linux on the Acer E3-111 – Aspire 
-E3-111-C5FN_. 
-http://www.sgvulcan.com/linux-on-the-acer-e3-111-aspire-e3-111-c5fn/ . 
-09/2014. 
+Vulcan:: Vulcan, Silviu: _Linux on the Acer E3-111 – Aspire
+E3-111-C5FN_.
+http://www.sgvulcan.com/linux-on-the-acer-e3-111-aspire-e3-111-c5fn/ .
+09/2014.
