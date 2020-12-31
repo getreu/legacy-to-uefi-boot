@@ -209,7 +209,7 @@ Number Start (sector) End (sector)  Size       Code  Name
 
 If you haven't changed the partition code to `EF00` (or `EF02`) you can do
 it now within `gdisk` with the command `t`, followed by the partition number
-`2` and the partition code `EF00` (or `EF02`).
+`2` (or `3`) and the partition code `EF00` (or `EF02`).
 
 
 
