@@ -29,9 +29,9 @@ NOTE: This manual has been tested on Debian 7 Wheezy, Debian 8 Jessie,
 Debian 9 Stretch and Debian 10 Buster.
 
 Please help to keep this manual up to date. It is hosted on
-https://github.com/getreu/legacy-to-uefi-boot[Github].  There you can file
-https://github.com/getreu/legacy-to-uefi-boot/issues[issues] and
-https://github.com/getreu/legacy-to-uefi-boot/pulls[pull requests].
+https://gitlab.com/getreu/legacy-to-uefi-boot[Github].  There you can file
+https://gitlab.com/getreu/legacy-to-uefi-boot/issues[issues] and
+https://gitlab.com/getreu/legacy-to-uefi-boot/pulls[pull requests].
 
 
 .Before you start
