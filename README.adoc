@@ -89,7 +89,7 @@ Filesystem             Size  Used Avail Use% Mounted on
 
 As you can see in the following partition table of the Debian legacy
 boot system my `/boot` partition is number 1
-(`/dev/sdb1`). On never systems SSD-disks might be listed as
+(`/dev/sdb1`). On newer systems SSD-disks might be listed as
 `/dev/nvme0n1p1` where `p1` designates the first partition.
 
 WARNING: Although 1 is the default value
@@ -132,7 +132,7 @@ Number  Start (sector)    End (sector)  Size       Code  Name
 
 
 
-=== Create GPT partition table
+=== Create a GPT partition table
 
 Transform the partition table from MBR to GPT with
 
@@ -217,7 +217,8 @@ it now within `gdisk` with the command `t`, followed by the partition number
 == Mount the Debian filesystem
 
 NOTE: The recovery mode of the Debian >= 9 Stretch installer disk
-automates all following steps in this section. Try this first.
+automates all following subsections in this section. Try this first.
+
 
 1. Reboot and enable UEFI in BIOS.
 2. Insert a Debian installation disk.
@@ -235,6 +236,7 @@ If the above does not work work for you,
 follow the rest of this section.
 
 The next step differs whether the `root`-filesystem is encrypted or not.
+
 
 
 === Mount a non-encrypted "`root`"-filesystem
