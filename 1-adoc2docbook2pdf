@@ -1,13 +1,13 @@
 #!/bin/sh
 # Author: Jens Getreu
 
-
+# set -x
 
 render () {
 
-
+SCRIPT_DIR=$(dirname $(readlink -f $0))
 AdocBase=$(basename "$1" ".adoc")
-cd "source" || echo "Error: no source directory found!" || exit 1 
+cd "source" || echo "Error: no source directory found!" || exit 1
 InDir="./"
 OutDir="../build/pdf"
 mkdir -p "$OutDir"
@@ -15,18 +15,17 @@ PdfBase=$(basename "$2" ".pdf")
 XmlFile="$OutDir/$AdocBase.xml"
 PdfFile="$OutDir/$PdfBase.pdf"
 
-set -x
 asciidoctor -b docbook -a data-uri!  -D "$OutDir" "$1"
 
 cp -r "$InDir/images/" "$OutDir"
+cp -r "$InDir/docbook-xsl" "$OutDir"
 
-#fopub -t ./docbook-xsl  "$XmlFile" && \
-fopub -H  "$XmlFile" && \
-	rm  "$XmlFile" && \
-    rm  -v -r "$OutDir/images/" ; \
-    rm  -v -r "$OutDir/.asciidoctor/" ; \
-    mv -v "$OutDir/$AdocBase.pdf" "$OutDir/$PdfBase.pdf" && \
-	mupdf "$PdfFile" & 
+"$SCRIPT_DIR/docbook52pdf" "$XmlFile" "$PdfFile"
+
+rm -R "$OutDir/images"
+rm -R "$OutDir/docbook-xsl"
+rm "$XmlFile"
+
 }
 
 
