@@ -29,7 +29,7 @@ NOTE: This manual has been tested on Debian 7 Wheezy, Debian 8 Jessie,
 Debian 9 Stretch and Debian 10 Buster.
 
 Please help to keep this manual up to date. It is hosted on
-https://gitlab.com/getreu/legacy-to-uefi-boot[Github].  There you can file
+https://gitlab.com/getreu/legacy-to-uefi-boot[GitLab].  There you can file
 https://gitlab.com/getreu/legacy-to-uefi-boot/issues[issues] and
 https://gitlab.com/getreu/legacy-to-uefi-boot/pulls[pull requests].
 
@@ -53,14 +53,14 @@ https://gitlab.com/getreu/legacy-to-uefi-boot/pulls[pull requests].
 
 1. Enable UEFI in BIOS.
 
-2. Boot an https://www.debian.org/CD/live/[recent Debian live]
+2. Boot a https://www.debian.org/CD/live/[recent Debian live]
    system on USB or DVD.
 
 
 === Identify Debian's "`/boot`" partition
 
 My legacy boot system had a 243 MiB
-ext2 partition mounted on /boot. This partition is never encrypted.
+ext2 partition mounted on `/boot`. This partition is never encrypted.
 It is where the grub files and Linux
 kernels reside. Check by double clicking on the
 partition icon on the live-disk-desktop and have a look inside.
@@ -89,8 +89,8 @@ Filesystem             Size  Used Avail Use% Mounted on
 
 As you can see in the following partition table of the Debian legacy
 boot system my `/boot` partition is number 1
-(`/dev/sdb1`). On newer systems SSD-disks might be listed as
-`/dev/nvme0n1p1` where `p1` designates the first partition.
+(`/dev/sdb1`). On newer systems, SSD-disks might be listed as
+`/dev/nvme0n1p1`, where `p1` designates the first partition.
 
 WARNING: Although 1 is the default value
 for standard debian installations better check!
